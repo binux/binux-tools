@@ -1,0 +1,171 @@
+#include <scws.h>
+#include <stdlib.h>
+#include "python2.6/Python.h"
+
+scws_t s;
+
+// warps
+static PyObject *warp_scws_set_charset(PyObject *self, PyObject *args) {
+  const char *cs;
+  if (!PyArg_ParseTuple(args, "s", &cs))
+    return NULL;
+  scws_set_charset(s, cs);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_add_dict(PyObject *self, PyObject *args) {
+  char *fpath;
+  int mode;
+  if (!PyArg_ParseTuple(args, "si", &fpath, &mode))
+    return NULL;
+  scws_add_dict(s, fpath, mode);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_set_dict(PyObject *self, PyObject *args) {
+  char *fpath;
+  int mode;
+  if (!PyArg_ParseTuple(args, "si", &fpath, &mode))
+    return NULL;
+  scws_set_dict(s, fpath, mode);
+  return Py_BuildValue("i", 1);
+}
+
+
+static PyObject *warp_scws_set_rule(PyObject *self, PyObject *args) {
+  char *fpath;
+  if (!PyArg_ParseTuple(args, "s", &fpath))
+    return NULL;
+  scws_set_rule(s, fpath);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_set_ignore(PyObject *self, PyObject *args) {
+  int yes;
+  if (!PyArg_ParseTuple(args, "i", &yes))
+    return NULL;
+  scws_set_ignore(s, yes);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_set_multi(PyObject *self, PyObject *args) {
+  int mode;
+  if (!PyArg_ParseTuple(args, "i", &mode))
+    return NULL;
+  scws_set_multi(s, mode);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_set_duality(PyObject *self, PyObject *args) {
+  int yes;
+  if (!PyArg_ParseTuple(args, "i", &yes))
+    return NULL;
+  scws_set_duality(s, yes);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_set_debug(PyObject *self, PyObject *args) {
+  int yes;
+  if (!PyArg_ParseTuple(args, "i", &yes))
+    return NULL;
+  scws_set_debug(s, yes);
+  return Py_BuildValue("i", 1);
+}
+
+static PyObject *warp_scws_send_text(PyObject *self, PyObject *args) {
+  char *text;
+  int len;
+  if (!PyArg_ParseTuple(args, "si", &text, &len))
+    return NULL;
+  scws_send_text(s, text, len);
+  return Py_BuildValue("i", 1);
+}
+
+// scws_result
+typedef struct {
+  PyObject_HEAD
+  int off;
+  float idf;
+  unsigned char len;
+  char attr[3];
+} pyobj_scws_result;
+
+static PyTypeObject py_scws_result = {
+  PyObject_HEAD_INIT(NULL)
+  0,                         /*ob_size*/
+  "scws.scws_result",        /*tp_name*/
+  sizeof(pyobj_scws_result),    /*tp_basicsize*/
+  0,                         /*tp_itemsize*/
+  0,                         /*tp_dealloc*/
+  0,                         /*tp_print*/
+  0,                         /*tp_getattr*/
+  0,                         /*tp_setattr*/
+  0,                         /*tp_compare*/
+  0,                         /*tp_repr*/
+  0,                         /*tp_as_number*/
+  0,                         /*tp_as_sequence*/
+  0,                         /*tp_as_mapping*/
+  0,                         /*tp_hash */
+  0,                         /*tp_call*/
+  0,                         /*tp_str*/
+  0,                         /*tp_getattro*/
+  0,                         /*tp_setattro*/
+  0,                         /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,        /*tp_flags*/
+  "scws_result struct",           /* tp_doc */
+};
+
+static PyObject *warp_scws_get_result(PyObject *self, PyObject *args) {
+  PyObject *result = PyTuple_New(100);
+  scws_res_t res, cur;
+  int i;
+  while (res = cur = scws_get_result(s)) {
+    while(cur != NULL) {
+      pyobj_scws_result tmp;
+      tmp.off = cur->off;
+      tmp.idf = cur->idf;
+      tmp.len = cur->len;
+      memcpy(tmp.attr, cur->attr, 3);
+
+      PyTuple_SetItem(result, i, Py_BuildValue("O", tmp));
+      cur = cur->next;
+      i++;
+    }
+    scws_free_result(res);
+  }
+  return result;
+}
+
+// moethods
+static PyMethodDef SCWSMethods[] = {
+  { "set_charset", warp_scws_set_charset, METH_VARARGS, "set_charset" },
+  { "add_dict", warp_scws_add_dict, METH_VARARGS, "set_charset" },
+  { "set_dict", warp_scws_set_dict, METH_VARARGS, "set_charset" },
+  { "set_rule", warp_scws_set_rule, METH_VARARGS, "set_rule" },
+  { "set_ignore", warp_scws_set_ignore, METH_VARARGS, "set_ignore" },
+  { "set_multi", warp_scws_set_multi, METH_VARARGS, "set_multi" },
+  { "set_duality", warp_scws_set_duality, METH_VARARGS, "set_duality" },
+  { "set_debug", warp_scws_set_debug, METH_VARARGS, "set_debug" },
+  { "send_text", warp_scws_send_text, METH_VARARGS, "send_text" },
+  { "get_result", warp_scws_get_result, METH_NOARGS, "get_result" },
+  { NULL, NULL, 0, NULL }
+};
+
+// init
+PyMODINIT_FUNC initscws_py(void) {
+  if(!(s=scws_new())) {
+    printf("error, can't init the scws_t\n");
+    return ;
+  }
+
+  py_scws_result.tp_new = PyType_GenericNew;
+  if (PyType_Ready(&py_scws_result)  < 0)
+    return;
+
+  PyObject *m = Py_InitModule("scws_py", SCWSMethods);
+  if (m == NULL)
+    return ;
+
+  Py_INCREF(&py_scws_result);
+  PyModule_AddObject(m, "scws_result", (PyObject *)&py_scws_result);
+}
