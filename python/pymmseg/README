@@ -1,0 +1,83 @@
+pymmseg-cpp
+    by pluskid
+
+== DESCRIPTION:
+
+pymmseg-cpp is a Python interface to rmmseg-cpp. rmmseg-cpp is a high
+performance Chinese word segmentation utility for Ruby. However, the
+core part is written in C++ independent of Ruby. So I decide to write
+a Python interface for it in order to use it in my Python project.
+
+== FEATURES/PROBLEMS:
+
+* Runs fast and the memory consumption is small.
+* Support user customized dictionaries.
+
+* Can't work on Windows yet.
+
+== SYNOPSIS:
+
+=== A simple script
+
+pymmseg-cpp provides a simple script (bin/pymmseg), which can read the
+text from standard input and print the segmented result to standard
+output. Try pymmseg -h for help on the options.
+
+=== As a Python module
+
+To use pymmseg-cpp in normal Python program, first import the module and
+init by loading the dictionaries:
+
+  from pymmseg import mmseg
+
+  mmseg.dict_load_defaults()
+
+Then create a Algorithm object and call next_token until got a
+None. Or you can simply iterate through it:
+
+  algor = mmseg.Algorithm(text)
+  for tok in algor:
+      print '%s [%d..%d]' % (tok.text, tok.start, tok.end)
+
+== REQUIREMENTS:
+
+* python 2.5
+* g++
+
+== INSTALL:
+
+Download the package at
+http://pluskid.lifegoo.com/upload/project/pymmseg/downloads/ . If you
+download the source tarball, you'll need to compile it by
+
+  make build
+
+if you download the pre-compiled version, this step can be skipped.
+Then copy the pymmseg directory to your Python's package path. e.g.
+/usr/lib/python2.5/site-packages/ . Now you can use pymmseg in your
+application.
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2008 FIXME (different license?)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
