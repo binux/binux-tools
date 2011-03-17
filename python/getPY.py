@@ -5,12 +5,12 @@
 def getFirstPY(word, encoding='utf-8'):
     if isinstance(word, unicode):
         try:
-            word = word[0].encode('gbk', 'ignore')
+            word = word[0].encode('gbk')
         except:
             return '?'
     elif isinstance(word, str):
         try:
-            word = word.decode(encoding)[0].encode('gbk', 'ignore')
+            word = word.decode(encoding)[0].encode('gbk')
         except:
             return '?'
 
