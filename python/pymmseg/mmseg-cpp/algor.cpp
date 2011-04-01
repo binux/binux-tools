@@ -8,6 +8,19 @@ using namespace std;
 
 namespace rmmseg
 {
+    int disallowed_punct[] = {'"', '\'', '(', ')', '[', ']', '<', '>', '{', '}'};
+    int ispunct2(int c)
+    {
+        if (!ispunct(c))
+            return 0;
+        for(int i=0; i < sizeof(disallowed_punct); i++)
+        {
+            if (c == disallowed_punct[i])
+                return 0;
+        }
+        return 1;
+    }
+
     Token Algorithm::next_token()
     {
         do
@@ -37,7 +50,7 @@ namespace rmmseg
         {
             if (len > 1)
                 break;
-            if (isalnum(m_text[m_pos]) || m_text[m_pos] == '-')
+            if (isalnum(m_text[m_pos]) || ispunct2(m_text[m_pos]))
                 break;
             m_pos++;
             len = next_char();
@@ -48,7 +61,7 @@ namespace rmmseg
         {
             if (len > 1)
                 break;
-            if (!(isalnum(m_text[m_pos]) || m_text[m_pos] == '-'))
+            if (!(isalnum(m_text[m_pos]) || ispunct2(m_text[m_pos])))
                 break;
             m_pos++;
             len = next_char();
@@ -60,16 +73,21 @@ namespace rmmseg
         {
             if (len > 1)
                 break;
-            if (isalnum(m_text[m_pos]) || m_text[m_pos] == '-')
+            if (isalnum(m_text[m_pos]) || ispunct2(m_text[m_pos]))
                 break;
             m_pos++;
             len = next_char();
         }
         
         Word *word;
-        word = dict::get(m_text+start, end-start);
+        char *m_text_ = new char[end-start];
+        for (int i=start; i<end; i++) {
+            m_text_[i-start] = toupper(m_text[i]);
+        }
+        word = dict::get(m_text_, end-start);
         if (word)
             return Token(m_text+start, end-start, word->attr);
+        delete m_text_;
 
         return Token(m_text+start, end-start, 'e');
     }
