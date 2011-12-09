@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>a.html</title>
+<!--[if IE]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<style>
+  article, aside, figure, footer, header, hgroup, 
+  menu, nav, section { display: block; }
+</style>
+</head>
+<body>
+  <ol id="step">
+    <li>goto <a href="b.html">b.html</a></li>
+    <li>go back</li>
+    <li>
+  <div id="main-src">
+    <pre>
+&lt;form action="http://www.httpbin.org/post" method="post" onsubmit="javascirpt:this.dst.innerHTML=this.src.innerHTML;"&gt;
+    &lt;textarea name="src"&gt;src input box&lt;/textarea&gt;
+    &lt;textarea name="dst" style="display: none;"&gt;&lt;/textarea&gt;
+    &lt;input type="submit" value="submit" /&gt;
+&lt;/form&gt;
+    </pre>
+  </div>
+        <form action="http://www.httpbin.org/post" method="post" onsubmit="javascirpt:this.dst.innerHTML=this.src.innerHTML;">
+          <textarea name="src">src input box</textarea>
+          <textarea name="dst" style="display: none;"></textarea>
+        <input type="submit" value="submit" />
+      </form>
+    </li>
+  </ol>
+  <div class="result">
+    <p>should be:</p>
+    <pre>
+  "form": {
+    "src": "src input box", 
+    "dst": "src input box", 
+  }, 
+    </pre>          
+    <p>on chrome:</p>
+    <pre>
+  "form": {
+    "src": "src input box", 
+    "dst": "", 
+  }, 
+    </pre>          
+  </div>
+</body>
+</html>
